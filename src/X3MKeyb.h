@@ -42,13 +42,6 @@ uint8_t mCODE0, mCODE1;
 boolean codeOk, firstPressUp, secondPressUP, differentKey;
 uint32_t btTime;
 
-
-uint32_t pressTimeStamp;
-
-
-
-uint8_t ckp, cks;
-
 boolean progStart, warnStop, stopProg, delAllPults;
 float learnTime[3];
 boolean startPress, startLearn;
@@ -94,7 +87,7 @@ if(!btState[0] && !btState[1] && firsPress && codeOk && (millis()-pressStartTime
 firstPressUp=0; firsPress=0; longPress=0; doublePress=0; secondPress=0; secondPressUP=0; differentKey=0; codeOk=0;}
 
 if(!codeOk) {
-if((btState[0] || btState[1]) && !firsPress) {firsPress=1; pressStartTime=millis(); CODE=0; mCODE0=0; mCODE1=0; pressTimeStamp=0xFFFF & millis(); CMn(pressTimeStamp);} // нажали 1 раз
+if((btState[0] || btState[1]) && !firsPress) {firsPress=1; pressStartTime=millis(); CODE=0; mCODE0=0; mCODE1=0;} // нажали 1 раз
 
 if(firsPress && !firstPressUp && mCODE0!=3) {
 if(btState[0] && !btState[1]) {mCODE0=1;} if(!btState[0] && btState[1]) {mCODE0=2;}
