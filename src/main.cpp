@@ -167,7 +167,7 @@ addr = startAdress;
 EEPROM.put (addr, save);
 addr = addr+(sizeof(save));
 EEPROM.put (addr,save.saveCount);
-CM("Save "); CM(sizeof(save)); CM(" byte "); CM("to adress: "); CM(startAdress); CM(" | "); 
+CM("Save "); CM(int32_t(sizeof(save))); CM(" byte "); CM("to adress: "); CM(startAdress); CM(" | "); 
 CM(save.saveCount); CMn(" num(s).");}
 
 void ReadData() {uint8_t initread=0; int16_t addr=4095; boolean needSave=0;
@@ -178,7 +178,7 @@ EEPROM.get (addr, startAdress);
 addr = startAdress;
 EEPROM.get (addr, save);
 }
-CM("Read adr: "); CM(startAdress); CM(", "); CM(sizeof(save)); CMn(" byte");
+CM("Read adr: "); CM(startAdress); CM(", "); CM(int32_t(sizeof(save))); CMn(" byte");
 #if defined ButtonEnable
 for_i(0,5) But[i].setDoubleTime(&save.BtnHOLD);
 CM("Dbl clk: "); CM(But[0].getCoefficient()); CM(" : "); CM(But[0].getDoubleTime()); CM(" - "); CMn(But[0].getLongTime());
@@ -298,7 +298,7 @@ for_t(0,saveGroup) for_i(0,cellButton) {if(readRF.b_Code==save.butCode[t][i]) {!
 
 void programRF(buttonCod readCod={0,0}, uint8_t in=0) {if(prgMode!=1) return; static uint32_t RFCODE, lastRFCODE, waitVoice, btnCode[cellButton], progModeTime; // программирование RF
 static boolean startProg, completeProg, progRfCode, chekPult, AllCellSave, freeBlokRF, btAlreadySaved; static uint8_t saveRFGroup; // 10 пультов по 8 кнопок
-static enum rfbutton {but1, but2, but3, but4, but5, but6, but7, but8, buz1, buz2, buz3, buz4, buz5, buz6, buz7, buz8, idl, end} mode; static uint8_t buzerMode; static boolean MoveCels;
+static enum rfbutton {but1, but2, but3, but4, but5, but6, but7, but8, buz1, buz2, buz3, buz4, buz5, buz6, buz7, buz8, idl, end} mode; static boolean MoveCels;
 
 if(in) {switch (in) {
 case 100: startProg=0; break;
@@ -313,7 +313,8 @@ case but4: btnCode[3]=9999999; mode=buz5; break;
 case but5: btnCode[4]=9999999; mode=buz6; break;
 case but6: btnCode[5]=9999999; mode=buz7; break;
 case but7: btnCode[6]=9999999; mode=buz8; break;
-case but8: btnCode[7]=9999999; mode=end; break;}
+case but8: btnCode[7]=9999999; mode=end; break;
+default: CM("Other state"); break;}
 Buzer(19); sBus(118); progModeTime=millis(); waitVoice=1700; RFCODE=0;} break;
 case 104: mode=end; break;}}
 
@@ -335,7 +336,8 @@ case buz4: Buzer(9); sBus(111); mode=but4; CMn("Prg but 4"); break;
 case buz5: Buzer(9); sBus(112); mode=but5; CMn("Prg but 5"); break;
 case buz6: Buzer(9); sBus(113); mode=but6; CMn("Prg but 6"); break;
 case buz7: Buzer(9); sBus(114); mode=but7; CMn("Prg but 7"); break;
-case buz8: Buzer(9); sBus(115); mode=but8; CMn("Prg but 8"); break;} progModeTime=millis(); waitVoice=1700;}
+case buz8: Buzer(9); sBus(115); mode=but8; CMn("Prg but 8"); break;
+default: CM("Other state"); break;} progModeTime=millis(); waitVoice=1700;}
 
 if(!chekPult && mode!=idl && RFCODE && millis()-progModeTime>waitVoice) {CM("Check RF Code "); CMn(RFCODE);
 for_t(0,saveGroup) for_i(0,cellButton) {if(saveRFGroup!=t && save.butCode[t][i]==RFCODE) {saveRFGroup=t; MoveCels=0; CM("Already saved in group "); CMn(t); sBus(107); progModeTime=millis(); waitVoice=2500; break;}}
@@ -351,7 +353,8 @@ case but4: numsButton=4; break;
 case but5: numsButton=5; break;
 case but6: numsButton=6; break;
 case but7: numsButton=7; break;
-case but8: numsButton=8; break;}
+case but8: numsButton=8; break;
+default: CM("Other state"); break;}
 for_i(0,numsButton) if(RFCODE==btnCode[i]) {find=1; break;} if(find) {btAlreadySaved=1; CM(RFCODE); rfCode=0; RFCODE=0; CM(" already saved in "); // кнопка уже была сохранена
 CMn(mode/2); sBus(119); progModeTime=millis(); waitVoice=2330;}}
 
@@ -364,8 +367,9 @@ case but4: btnCode[3]=RFCODE; mode=buz5; CM("4"); break;
 case but5: btnCode[4]=RFCODE; mode=buz6; CM("5"); break;
 case but6: btnCode[5]=RFCODE; mode=buz7; CM("6"); break;
 case but7: btnCode[6]=RFCODE; mode=buz8; CM("7"); break;
-case but8: btnCode[7]=RFCODE; mode=end;  CM("8"); break;} CMn(" code"); Buzer(20); sBus(116); progRfCode=1; RFCODE=0; chekPult=0; progModeTime=millis(); waitVoice=170;}
-btAlreadySaved=0;
+case but8: btnCode[7]=RFCODE; mode=end;  CM("8"); break;
+default: CM("Other state"); break;}
+CMn(" code"); Buzer(20); sBus(116); progRfCode=1; RFCODE=0; chekPult=0; progModeTime=millis(); waitVoice=170;} btAlreadySaved=0;
 
 if(!completeProg && mode==end) {mode=idl; if(progRfCode) {completeProg=1; CM("Save in "); CM(saveRFGroup); CM(" group: ");
 for_i(0,cellButton) {save.butCode[saveRFGroup][i]=btnCode[i]; CM(btnCode[i]); CM(" ");} CMn();

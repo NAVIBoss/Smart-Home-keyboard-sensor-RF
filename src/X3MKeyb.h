@@ -101,8 +101,8 @@ if(btState[0] && !btState[1]) {mCODE1=1;} if(!btState[0] && btState[1]) {mCODE1=
 if(btState[0] && btState[1]) {mCODE1=3; Buzer(24);} mCODE0!=mCODE1 ? differentKey=1 : differentKey=0;}
 
 if(!secondPressUP && !btState[0] && !btState[1] && secondPress) {secondPressUP=1;} // отпустили 2 раз
-if((btState[0] || btState[1]) && secondPress && firsPress && millis() - pressStartTime >= BtnLONG) {doublePress=1; longPress=1; goto outButton;} // Double Long
-if((btState[0] || btState[1]) && !secondPress && firsPress && millis() - pressStartTime >= BtnLONG) {longPress=1; goto outButton;} // Long
+if((btState[0] || btState[1]) && secondPress && firsPress && millis() - pressStartTime >= uint32_t(BtnLONG)) {doublePress=1; longPress=1; goto outButton;} // Double Long
+if((btState[0] || btState[1]) && !secondPress && firsPress && millis() - pressStartTime >= uint32_t(BtnLONG)) {longPress=1; goto outButton;} // Long
 if(progMode!=4 && firstPressUp && millis() - pressStartTime > BtnHOLD && !secondPress && mCODE0 != 0) {goto outButton;} // отпустили быстро - Click
 if(secondPressUP && millis() - pressStartTime <= BtnHOLD) {doublePress=1; goto outButton;}} // Double Click
 
@@ -152,7 +152,7 @@ if(!act && CODE==7) {act=1; Btnkf-=0.20; BtnHOLD-=100;}
 if(!act && CODE==2) {act=1; Btnkf+=0.05; BtnHOLD+=25;}
 if(!act && CODE==8) {act=1; Btnkf+=0.20; BtnHOLD+=100;}
 if(CODE==1 || CODE==2 || CODE==7 || CODE==8) {
-if(Btnkf<0.80) Btnkf=0.80; if(Btnkf > 4.00) Btnkf=4.00; if(BtnHOLD<400) BtnHOLD=400; if(BtnHOLD>2000) BtnHOLD=2000;//0.80-4.00 152-216
+if(Btnkf<0.80) {Btnkf=0.80;} if(Btnkf > 4.00) Btnkf=4.00; if(BtnHOLD<400) BtnHOLD=400; if(BtnHOLD>2000) BtnHOLD=2000;//0.80-4.00 152-216
 Btnkf>1.00 ? BtnLONG=400+50*Btnkf : BtnLONG=400; CM("Dbl clk: "); CM(Btnkf); CM(" : "); CM(BtnHOLD); CM(" - "); CMn(BtnLONG);
 switch (CODE) {
 case 1: CODE=0; returnCode=36; break;
@@ -167,9 +167,9 @@ if(startPress && secondPress) {pressDelay=millis()-startTime;
 learnTime[countLearn]=pressDelay; countLearn++; if(countLearn>2) countLearn=0; CM("clk: "); CM(countLearn);
 float allTime=0; for_i(0,3) allTime+=learnTime[i]; CM(" time: "); CM(pressDelay+100); CMn(" msek. "); CM("Dbl clk: ");
 Btnkf=(allTime/3.00+100.00)/500.00; Btnkf=(round(Btnkf*100.00/5.00))*5.00/100.00; if(Btnkf<0.80) Btnkf=0.80; if(Btnkf>4.00) Btnkf=4.00; CM(Btnkf);
-if(Btnkf<0.80) Btnkf=0.80; if(Btnkf > 4.00) Btnkf=4.00; Btnkf>1.00 ? BtnLONG=400+50*Btnkf : BtnLONG=400; BtnHOLD=500*Btnkf;
+if(Btnkf<0.80) {Btnkf=0.80;} if(Btnkf > 4.00) Btnkf=4.00; Btnkf>1.00 ? BtnLONG=400+50*Btnkf : BtnLONG=400; BtnHOLD=500*Btnkf;
 CM(" : "); CM(BtnHOLD); CM(" - "); CMn(BtnLONG); startPress=0; returnCode=36;}}}
-if(progMode && !progStart && firsPress) progModeTime=millis(); if(progMode && !progStart && !firsPress) {progStart=1; exitCnt=0; stopProg=0; delAllPults=0; CODE=0;}// не активируем таймер после запуска программирования пока не отпущена клавиша
+if(progMode && !progStart && firsPress) {progModeTime=millis();} if(progMode && !progStart && !firsPress) {progStart=1; exitCnt=0; stopProg=0; delAllPults=0; CODE=0;}// не активируем таймер после запуска программирования пока не отпущена клавиша
 if(progStart && !progMode) {progStart=0; warnStop=0;} if(!firsPress) CODE=0;
 }// ------------------------------------------------------------------------------------------------------------------ программирование
 

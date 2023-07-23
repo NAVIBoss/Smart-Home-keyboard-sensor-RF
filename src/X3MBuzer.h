@@ -35,8 +35,8 @@ void X3MBuzer::en() {Zumer=1;}
 void X3MBuzer::dis() {Zumer=0;}
 
 void X3MBuzer::go(uint8_t in=0) {static uint8_t nextSound;
-if((!Zumer && in!=16 && !mode) || (!in && !mode)) return; if(in && mode) {nextSound=in; CM("Save sound: "); CMn(in);}
-if (!in && millis()-timeBUZ<timeWait) return; timeBUZ=millis(); if(in && !mode) {mode=1; sound=in; CM("-> Sound: "); CMn(sound);}
+if((!Zumer && in!=16 && !mode) || (!in && !mode)) {return;} if(in && mode) {nextSound=in; CM("Save sound: "); CMn(in);}
+if (!in && millis()-timeBUZ<timeWait) {return;} timeBUZ=millis(); if(in && !mode) {mode=1; sound=in; CM("-> Sound: "); CMn(sound);}
 switch (sound) {
 case 1: switch (mode) { // Клик кнопки
 case 1: BUZ(1); timeWait=15; break;
