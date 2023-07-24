@@ -1,13 +1,13 @@
 #define FirmwareVersion "1.0"                         // версия прошивки
 //#define clearMemory                                   // записать в память начальные значения
-#define DebagEnable                                   // вывод в порт
+//#define DebagEnable                                   // вывод в порт
 #define SerialBusEnable                               // Отправка в виртуальный порт
 //#define SensorEnable                                  // Считывание сенсоров
 #define BuzerEnable                                   // Звуковое сопровождение
 #define EEPROM_Enable                                 // сохранение данных в Arduino
 #define RFcontrollerEnable                            // считывание кодов RF пультов
 #define ButtonEnable                                  // опрашивать кнопки
-#define ArduinoMEGA                                   // Arduino MEGA - другие порты для BitRead
+//#define ArduinoMEGA                                   // Arduino MEGA - другие порты для BitRead
 
 #include <Arduino.h>
 
@@ -37,8 +37,8 @@ private:
 #define CMf(x,y)
 #endif
 
-template<typename T>
-void ktl(T& kt) {static T ktr; if(ktr!=kt) {uart.print("=================== Check "); uart.print(ktr); uart.print(" -> "); uart.println(kt); ktr=kt;}}
+//template<typename T>
+//void ktl(T& kt) {static T ktr; if(ktr!=kt) {uart.print("=================== Check "); uart.print(ktr); uart.print(" -> "); uart.println(kt); ktr=kt;}}
 
 #define EVERY_MS(x) \
 static uint32_t tmr;\
