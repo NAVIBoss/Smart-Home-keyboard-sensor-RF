@@ -2,7 +2,7 @@
 //#define clearMemory                                   // записать в память начальные значения
 //#define DebagEnable                                   // вывод в порт
 #define SerialBusEnable                               // Отправка в виртуальный порт
-//#define SensorEnable                                  // Считывание сенсоров
+#define SensorEnable                                  // Считывание сенсоров
 #define BuzerEnable                                   // Звуковое сопровождение
 #define EEPROM_Enable                                 // сохранение данных в Arduino
 #define RFcontrollerEnable                            // считывание кодов RF пультов
@@ -73,7 +73,7 @@ X3MfastPIN fastpin;
 #define dRead(x) fastpin.digiRead(x)
 #define dWrite(x,y) fastpin.digiWrite(x,y)
 
-#if defined DebagEnable
+#if defined ArduinoMEGA
 #if defined BuzerEnable
 #include <X3MBuzer.h>
 X3MBuzer Buz(3);                                      // PIN пищалки
@@ -81,20 +81,18 @@ X3MBuzer Buz(3);                                      // PIN пищалки
 #else
 #define Buzer(x)
 #endif
-#if defined SensorEnable
-const uint8_t KitchenSenosor=A0;                      // PIN датчика маха кухни
-#endif
 #else
 #if defined BuzerEnable
 #include <X3MBuzer.h>
 X3MBuzer Buz(A4);                                        // PIN пищалки
-#define Buzer(x) Buz.go()
+#define Buzer(x) Buz.go(x)
 #else
 #define Buzer(x)
 #endif
+#endif
+
 #if defined SensorEnable
 const uint8_t KitchenSenosor=A0;                      // PIN датчика маха кухни
-#endif
 #endif
 
 #if defined ButtonEnable
@@ -222,11 +220,11 @@ else if(CODE.val<1000) {CM("Cod < 1000  "); seviceCOD.val=CODE.val+1000; lastRec
 switch (CODE.val) {
 case 300: if(save.Sensor[0]!=0) {save.Sensor[0]=0; SaveData();} CMn("Сенсор кухни по 0"); break; // kitchen sensor по 0
 case 301: if(save.Sensor[0]!=1) {save.Sensor[0]=1; SaveData();} CMn("Сенсор кухни по 1"); break; // kitchen sensor по 1
-case 302: if(save.Sensor[1]!=0) {save.Sensor[1]=0; SaveData();} CMn("Сенсор alarm по 0"); break; // alarm sensor по 1
+case 302: if(save.Sensor[1]!=0) {save.Sensor[1]=0; SaveData();} CMn("Сенсор alarm по 0"); break; // alarm sensor по 0
 case 303: if(save.Sensor[1]!=1) {save.Sensor[1]=1; SaveData();} CMn("Сенсор alarm по 1"); break; // alarm sensor по 1
-case 304: if(save.Sensor[2]!=0) {save.Sensor[2]=0; SaveData();} CMn("Сенсор ванны по 0"); break; // bath sensor по 1
+case 304: if(save.Sensor[2]!=0) {save.Sensor[2]=0; SaveData();} CMn("Сенсор ванны по 0"); break; // bath sensor по 0
 case 305: if(save.Sensor[2]!=1) {save.Sensor[2]=1; SaveData();} CMn("Сенсор ванны по 1"); break; // bath sensor по 1
-case 306: if(save.Sensor[3]!=0) {save.Sensor[3]=0; SaveData();} CMn("Сенсор двери по 0"); break; // input door sensor по 1
+case 306: if(save.Sensor[3]!=0) {save.Sensor[3]=0; SaveData();} CMn("Сенсор двери по 0"); break; // input door sensor по 0
 case 307: if(save.Sensor[3]!=1) {save.Sensor[3]=1; SaveData();} CMn("Сенсор двери по 1"); break; // input door sensor по 1
 case 218: float Btnkf=save.BtnHOLD/500.00; CM("Clk time: "); char value[8]; dtostrf(Btnkf,1,2,value); CM("Dbl clk: "); CM(value); CM(" : "); dtostrf(500*Btnkf,1,0,value); CM(value); CMn(" msek.");
 dtostrf(Btnkf,1,2,value); data=(Btnkf*100/5+136);
@@ -248,15 +246,16 @@ void SerialBus(uint16_t data=0) {if(data) {CM("<== Bus "); CMn(data);}}
 
 #if defined SensorEnable
 void readSensor() {static boolean firstStart[3], inp, bath, alarm; static boolean init, waitProc[3], changeState[3], state[3]; static uint32_t timer[3];
-if(millis()-timer[0]>100) {if(save.Sensor[3]) state[0]=dRead(A3); else state[0]=!dRead(A3);} if(millis()-timer[1]>100) {if(save.Sensor[2]) state[1]=dRead(A2); else state[1]=!dRead(A2);}
+if(millis()-timer[1]>100) {if(save.Sensor[2]) state[1]=dRead(A2); else state[1]=!dRead(A2);} // A2 ванна
+if(millis()-timer[0]>100) {if(save.Sensor[3]) state[0]=dRead(A3); else state[0]=!dRead(A3);} // входная дверь
 #if defined ArduinoMEGA
-if(millis()-timer[2]>100) {if(save.Sensor[1]) state[2]=dRead(A4); else state[2]=!dRead(A4);} // A1 сгоревший
+if(millis()-timer[2]>100) {if(save.Sensor[1]) state[2]=dRead(A4); else state[2]=!dRead(A4);} // A1 сгоревший (alarm)
 #else
-if(millis()-timer[2]>100) {if(save.Sensor[1]) state[2]=dRead(A1); else state[2]=!dRead(A1);}
+if(millis()-timer[2]>100) {if(save.Sensor[1]) state[2]=dRead(A1); else state[2]=!dRead(A1);} // alarm
 #endif
-if(!waitProc[0] && inp!=state[0]) {inp=state[0]; waitProc[0]=1; timer[0]=millis(); if(firstStart[0]) {CM("Sensor A3 = "); if(!inp) {CMn("LOW"); sBus(140);} else {CMn("HIGH"); Buzer(1); sBus(141);}}}
-if(!waitProc[1] && bath!=state[1]) {bath=state[1]; waitProc[1]=1; timer[1]=millis(); if(firstStart[1]) {CM("Sensor A2 = "); if(!bath) {CMn("LOW"); Buzer(1); sBus(142);} else {CMn("HIGH"); sBus(143);}}}
-if(!waitProc[2] && alarm!=state[2]) {alarm=state[2]; waitProc[2]=1; timer[2]=millis(); if(firstStart[2]) {CM("Sensor A1 = "); if(!alarm) {CMn("LOW"); Buzer(1); sBus(144);} else {CMn("HIGH"); sBus(145);}}}
+if(!waitProc[0] && inp!=state[0]) {inp=state[0]; waitProc[0]=1; timer[0]=millis(); if(firstStart[0]) {CM("Sensor A3 = "); if(!inp) {CMn("OFF"); sBus(141);} else {CMn("ON"); Buzer(1); sBus(140);}}}
+if(!waitProc[1] && bath!=state[1]) {bath=state[1]; waitProc[1]=1; timer[1]=millis(); CM("state[1]="); CMn(state[1]); if(firstStart[1]) {CM("Sensor A2 = "); if(!bath) {CMn("OFF"); sBus(143);} else {CMn("ON"); Buzer(1); sBus(142);}}}
+if(!waitProc[2] && alarm!=state[2]) {alarm=state[2]; waitProc[2]=1; timer[2]=millis(); if(firstStart[2]) {CM("Sensor A1 = "); if(!alarm) {CMn("OFF"); sBus(145);} else {CMn("ON"); Buzer(1); sBus(144);}}}
 
 for_i(0,3) {
 if(!firstStart[i] && millis()-timer[i]>1000) {firstStart[i]=1; CM("Init sensor A"); CM(i); CMn(" Ok");}
@@ -467,7 +466,11 @@ Serial.begin(57600);
 mySwitch.enableReceive(0);  // Receiver on interrupt 0 => that is pin #2
 #endif
 #if defined SensorEnable
+#if defined ArduinoMEGA
+pinMode(A1,INPUT); pinMode(A4,INPUT);  pinMode(A3,INPUT);
+#else
 pinMode(A1,INPUT); pinMode(A2,INPUT); pinMode(A3,INPUT);
+#endif
 #endif
 #if defined clearMemory
 SaveData();
